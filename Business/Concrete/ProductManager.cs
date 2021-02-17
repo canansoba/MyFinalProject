@@ -1,17 +1,21 @@
 ﻿using Business.Abstract;
 using Business.Constants;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
+using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.InMemory;
 using Entities.Concrete;
 using Entities.DTOs;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Business.Concrete
 {
-    public class ProductManager:IProductService
+    public class ProductManager : IProductService
 
     {
         IProductDal _productDal;
@@ -22,17 +26,14 @@ namespace Business.Concrete
         }
         //Autofac bize AOP imkanı sunuyor.
         //[LogAspect] --> AOP metodun yönetim kodlarını yazıyoruz. 
+        [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
-        {
-            if (product.ProductName.Length<2)
-            {
-                //magic strings
-                return new ErrorResult(Messages.ProductNameInvalid);
-            }
+        {     
+            //business codes
+
             _productDal.Add(product);
             return new SuccessResult(Messages.ProductAdded);
-           // return new Result(true,"Ürün eklendi.");
-            //throw new NotImplementedException();
+
         }
 
         public IDataResult<List<Product>> GetAll()
@@ -43,12 +44,12 @@ namespace Business.Concrete
             }
             //iş kodları
             //yetkisi var mı?            
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);        
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);
         }
 
         public IDataResult<List<Product>> GetAllByCategoryId(int id)
         {
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p=>p.CategoryId == id));
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.CategoryId == id));
         }
 
         public IDataResult<Product> GetById(int productId)
@@ -59,7 +60,7 @@ namespace Business.Concrete
 
         public IDataResult<List<Product>> GetByUnitPrice(decimal min, decimal max)
         {
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p=>p.UnitPrice>=min && p.UnitPrice<=max));
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.UnitPrice >= min && p.UnitPrice <= max));
         }
 
         public IDataResult<List<ProductDetailDto>> GetProductDetails()
@@ -69,7 +70,7 @@ namespace Business.Concrete
                 return new ErrorDataResult<List<ProductDetailDto>>(Messages.MaintenanceTime);
             }
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
-           // throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
     }
 }
