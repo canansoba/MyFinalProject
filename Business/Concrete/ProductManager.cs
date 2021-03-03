@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
@@ -27,10 +28,10 @@ namespace Business.Concrete
         {
             _productDal = productDal;
             _categoryService = categoryService;
-
         }
         //Autofac bize AOP imkanı sunuyor.
         //[LogAspect] --> AOP metodun yönetim kodlarını yazıyoruz. 
+        [SecuredOperation("product.add,admin,editor")]
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
